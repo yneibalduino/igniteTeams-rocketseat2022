@@ -16,12 +16,14 @@ import { playersGetByGroupAndTeam } from '@storage/players/playersGetByGroupAndT
 import { PlayerStorageDTO } from '@storage/players/PlayerStorageDTO';
 import { playerRemoveByGroup } from '@storage/players/playerRemoveByGroup';
 import { groupRemoveByName } from '../../storage/group/groupRemoveByName';
+import { Loading } from '@components/Loading';
 
 type RouteParams = {
   group: string;
 }
 
 export function Players(){
+  const [isLoading, setIsLoading] = useState(true);
   const navigation = useNavigation();
   const [newPlayerName, setNewPlayerName] = useState('');
   const [team, setTeam] = useState('Time A');
@@ -62,8 +64,10 @@ export function Players(){
   async function fetchPayersByTeam(){
 
     try{
+      setIsLoading(true);
       const playersByTeam = await playersGetByGroupAndTeam(group,team);
       setPlayers(playersByTeam);
+      setIsLoading(false);
     } catch(error){
       console.log(error);
       Alert.alert('Não foi possivel carregar as pessoas do time selecionado.');
@@ -108,7 +112,7 @@ export function Players(){
   }
 
   useEffect(() => {
-    fetchPayersByTeam()
+    fetchPayersByTeam();
   }, [team])
 
   return(
@@ -137,6 +141,7 @@ export function Players(){
       </Form>
       
       <HeaderList>
+        
         <FlatList 
           data={['Time A', 'Time B']}
           keyExtractor={item => item}
@@ -155,6 +160,10 @@ export function Players(){
         </NumberOfPlayers>
 
       </HeaderList>
+
+      {
+          isLoading ? <Loading /> :
+
       <FlatList 
         data={players}
         keyExtractor={item => item.name}
@@ -175,6 +184,7 @@ export function Players(){
           players.length === 0 && {flex: 1}
         ]}
       />
+    }
 
       <Button 
         title="Remover turma"
